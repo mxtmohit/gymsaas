@@ -14,6 +14,11 @@ CREATE TABLE gyms (
     owner_id UUID NOT NULL,
     description TEXT,
     operating_hours TEXT,
+    instagram_url TEXT,
+    youtube_url TEXT,
+    gallery_photo1 TEXT,
+    gallery_photo2 TEXT,
+    gallery_photo3 TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

@@ -1,22 +1,17 @@
-import React from 'react';
+import React from "react";
 
-interface LogoProps {
-  className?: string;
-  iconOnly?: boolean;
-}
-
-export default function Logo({ className = '', iconOnly = false }: LogoProps) {
+export default function Logo({ className = "", iconOnly = false }) {
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Neo-brutalist Icon Box */}
       <div className="relative flex items-center justify-center w-10 h-10 bg-brutal-yellow border-3 border-black shadow-[2px_2px_0px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000000] rounded-lg transition-all">
-        <svg 
-          className="w-6 h-6 text-black rotate-12" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="3" 
-          strokeLinecap="round" 
+        <svg
+          className="w-6 h-6 text-black rotate-12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
           strokeLinejoin="round"
         >
           <path d="m6.5 6.5 11 11" />
@@ -29,10 +24,13 @@ export default function Logo({ className = '', iconOnly = false }: LogoProps) {
           <path d="M10 14.828V10h4.828" />
         </svg>
       </div>
-      
+
       {!iconOnly && (
         <span className="font-extrabold text-xl tracking-tight text-black uppercase">
-          Flex<span className="text-black font-normal underline decoration-3 decoration-brutal-orange">Flow</span>
+          Flex
+          <span className="text-black font-normal underline decoration-3 decoration-brutal-orange">
+            Flow
+          </span>
         </span>
       )}
     </div>

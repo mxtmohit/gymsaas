@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
-import { mockDb, Gym, Plan, Member, Membership, Payment } from './mockDb';
+import { createClient } from "@supabase/supabase-js";
+import { mockDb } from "./mockDb";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 // Determine if Supabase is configured
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
@@ -15,50 +15,52 @@ export const db = {
   // Auth Operations
   getCurrentUser: async () => {
     if (supabase) {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user ? { id: user.id, email: user.email! } : null;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return user ? { id: user.id, email: user.email } : null;
     }
     return mockDb.getCurrentUser();
   },
 
-  login: async (email: string, password?: string) => {
+  login: async (email, password) => {
     if (supabase) {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: password || 'default-password-123',
+        password: password || "default-password-123",
       });
       if (error) throw error;
-      return { id: data.user!.id, email: data.user!.email! };
+      return { id: data.user.id, email: data.user.email };
     }
     return mockDb.login(email);
   },
 
-  signUp: async (email: string, gymName: string, slug: string, password?: string) => {
+  signUp: async (email, gymName, slug, password) => {
     if (supabase) {
-      const pswd = password || 'default-password-123';
+      const pswd = password || "default-password-123";
       const { data, error } = await supabase.auth.signUp({
         email,
         password: pswd,
       });
       if (error) throw error;
-      const user = data.user!;
+      const user = data.user;
 
       // Create Gym record
-      const newGym: Omit<Gym, 'id' | 'created_at'> = {
+      const newGym = {
         name: gymName,
         slug: slug,
         logo_url: null,
-        address: 'Enter Gym Address',
-        phone: 'Enter Contact Number',
-        upi_id: 'merchant@upi',
+        address: "Enter Gym Address",
+        phone: "Enter Contact Number",
+        upi_id: "merchant@upi",
         upi_qr_url: null,
         owner_id: user.id,
         description: `Welcome to ${gymName}!`,
-        operating_hours: '06:00 AM - 10:00 PM',
+        operating_hours: "06:00 AM - 10:00 PM",
       };
 
       const { data: gymData, error: gymError } = await supabase
-        .from('gyms')
+        .from("gyms")
         .insert(newGym)
         .select()
         .single();
@@ -69,29 +71,29 @@ export const db = {
       const defaultPlans = [
         {
           gym_id: gymData.id,
-          name: 'Monthly Plan',
+          name: "Monthly Plan",
           price: 1500,
           duration_days: 30,
-          description: 'Standard 1-month access.',
+          description: "Standard 1-month access.",
           is_active: true,
         },
         {
           gym_id: gymData.id,
-          name: 'Yearly Plan',
+          name: "Yearly Plan",
           price: 12000,
           duration_days: 365,
-          description: 'Standard 1-year access.',
+          description: "Standard 1-year access.",
           is_active: true,
-        }
+        },
       ];
 
       const { error: plansError } = await supabase
-        .from('plans')
+        .from("plans")
         .insert(defaultPlans);
 
       if (plansError) throw plansError;
 
-      return { id: user.id, email: user.email! };
+      return { id: user.id, email: user.email };
     }
 
     return mockDb.signUp(email, gymName, slug);
@@ -107,12 +109,12 @@ export const db = {
   },
 
   // Gyms Operations
-  getGymByOwner: async (ownerId: string): Promise<Gym | null> => {
+  getGymByOwner: async (ownerId) => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('gyms')
-        .select('*')
-        .eq('owner_id', ownerId)
+        .from("gyms")
+        .select("*")
+        .eq("owner_id", ownerId)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -120,12 +122,12 @@ export const db = {
     return mockDb.getGymByOwner(ownerId);
   },
 
-  getGymBySlug: async (slug: string): Promise<Gym | null> => {
+  getGymBySlug: async (slug) => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('gyms')
-        .select('*')
-        .eq('slug', slug)
+        .from("gyms")
+        .select("*")
+        .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -133,22 +135,22 @@ export const db = {
     return mockDb.getGymBySlug(slug);
   },
 
-  getGymsList: async (): Promise<Gym[]> => {
+  getGymsList: async () => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('gyms')
-        .select('*')
-        .order('name');
+        .from("gyms")
+        .select("*")
+        .order("name");
       if (error) throw error;
       return data || [];
     }
     return mockDb.getGymsList();
   },
 
-  updateGym: async (gym: Gym): Promise<void> => {
+  updateGym: async (gym) => {
     if (supabase) {
       const { error } = await supabase
-        .from('gyms')
+        .from("gyms")
         .update({
           name: gym.name,
           slug: gym.slug,
@@ -158,21 +160,23 @@ export const db = {
           upi_id: gym.upi_id,
           upi_qr_url: gym.upi_qr_url,
           description: gym.description,
-          operating_hours: gym.operating_hours
+          operating_hours: gym.operating_hours,
+          instagram_url: gym.instagram_url,
+          youtube_url: gym.youtube_url,
+          gallery_photo1: gym.gallery_photo1,
+          gallery_photo2: gym.gallery_photo2,
+          gallery_photo3: gym.gallery_photo3,
         })
-        .eq('id', gym.id);
+        .eq("id", gym.id);
       if (error) throw error;
       return;
     }
     return mockDb.updateGym(gym);
   },
 
-  deleteGym: async (gymId: string): Promise<void> => {
+  deleteGym: async (gymId) => {
     if (supabase) {
-      const { error } = await supabase
-        .from('gyms')
-        .delete()
-        .eq('id', gymId);
+      const { error } = await supabase.from("gyms").delete().eq("id", gymId);
       if (error) throw error;
       return;
     }
@@ -180,20 +184,20 @@ export const db = {
   },
 
   // Plans Operations
-  getPlansByGym: async (gymId: string): Promise<Plan[]> => {
+  getPlansByGym: async (gymId) => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('plans')
-        .select('*')
-        .eq('gym_id', gymId)
-        .order('price', { ascending: true });
+        .from("plans")
+        .select("*")
+        .eq("gym_id", gymId)
+        .order("price", { ascending: true });
       if (error) throw error;
       return data || [];
     }
     return mockDb.getPlansByGym(gymId);
   },
 
-  savePlan: async (plan: Plan): Promise<void> => {
+  savePlan: async (plan) => {
     if (supabase) {
       const planData = {
         gym_id: plan.gym_id,
@@ -204,13 +208,16 @@ export const db = {
         is_active: plan.is_active,
       };
 
-      if (plan.id.startsWith('temp-') || plan.id.length < 10) {
+      if (plan.id.startsWith("temp-") || plan.id.length < 10) {
         // New Plan
-        const { error } = await supabase.from('plans').insert(planData);
+        const { error } = await supabase.from("plans").insert(planData);
         if (error) throw error;
       } else {
         // Update Plan
-        const { error } = await supabase.from('plans').update(planData).eq('id', plan.id);
+        const { error } = await supabase
+          .from("plans")
+          .update(planData)
+          .eq("id", plan.id);
         if (error) throw error;
       }
       return;
@@ -218,12 +225,9 @@ export const db = {
     return mockDb.savePlan(plan);
   },
 
-  deletePlan: async (planId: string): Promise<void> => {
+  deletePlan: async (planId) => {
     if (supabase) {
-      const { error } = await supabase
-        .from('plans')
-        .delete()
-        .eq('id', planId);
+      const { error } = await supabase.from("plans").delete().eq("id", planId);
       if (error) throw error;
       return;
     }
@@ -231,25 +235,25 @@ export const db = {
   },
 
   // Members Operations
-  getMembersByGym: async (gymId: string): Promise<Member[]> => {
+  getMembersByGym: async (gymId) => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('members')
-        .select('*')
-        .eq('gym_id', gymId)
-        .order('name');
+        .from("members")
+        .select("*")
+        .eq("gym_id", gymId)
+        .order("name");
       if (error) throw error;
       return data || [];
     }
     return mockDb.getMembersByGym(gymId);
   },
 
-  getMemberById: async (id: string): Promise<Member | null> => {
+  getMemberById: async (id) => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('members')
-        .select('*')
-        .eq('id', id)
+        .from("members")
+        .select("*")
+        .eq("id", id)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -257,7 +261,7 @@ export const db = {
     return mockDb.getMemberById(id);
   },
 
-  saveMember: async (member: Member): Promise<void> => {
+  saveMember: async (member) => {
     if (supabase) {
       const memberData = {
         gym_id: member.gym_id,
@@ -268,11 +272,14 @@ export const db = {
         status: member.status,
       };
 
-      if (member.id.startsWith('temp-') || member.id.length < 10) {
-        const { error } = await supabase.from('members').insert(memberData);
+      if (member.id.startsWith("temp-") || member.id.length < 10) {
+        const { error } = await supabase.from("members").insert(memberData);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('members').update(memberData).eq('id', member.id);
+        const { error } = await supabase
+          .from("members")
+          .update(memberData)
+          .eq("id", member.id);
         if (error) throw error;
       }
       return;
@@ -280,12 +287,12 @@ export const db = {
     return mockDb.saveMember(member);
   },
 
-  deleteMember: async (memberId: string): Promise<void> => {
+  deleteMember: async (memberId) => {
     if (supabase) {
       const { error } = await supabase
-        .from('members')
+        .from("members")
         .delete()
-        .eq('id', memberId);
+        .eq("id", memberId);
       if (error) throw error;
       return;
     }
@@ -293,20 +300,20 @@ export const db = {
   },
 
   // Memberships Operations
-  getMembershipsByMember: async (memberId: string): Promise<Membership[]> => {
+  getMembershipsByMember: async (memberId) => {
     if (supabase) {
       const { data, error } = await supabase
-        .from('memberships')
-        .select('*')
-        .eq('member_id', memberId)
-        .order('expiry_date', { ascending: false });
+        .from("memberships")
+        .select("*")
+        .eq("member_id", memberId)
+        .order("expiry_date", { ascending: false });
       if (error) throw error;
       return data || [];
     }
     return mockDb.getMembershipsByMember(memberId);
   },
 
-  saveMembership: async (membership: Membership): Promise<void> => {
+  saveMembership: async (membership) => {
     if (supabase) {
       const membershipData = {
         member_id: membership.member_id,
@@ -316,11 +323,16 @@ export const db = {
         status: membership.status,
       };
 
-      if (membership.id.startsWith('temp-') || membership.id.length < 10) {
-        const { error } = await supabase.from('memberships').insert(membershipData);
+      if (membership.id.startsWith("temp-") || membership.id.length < 10) {
+        const { error } = await supabase
+          .from("memberships")
+          .insert(membershipData);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('memberships').update(membershipData).eq('id', membership.id);
+        const { error } = await supabase
+          .from("memberships")
+          .update(membershipData)
+          .eq("id", membership.id);
         if (error) throw error;
       }
       return;
@@ -329,25 +341,27 @@ export const db = {
   },
 
   // Payments Operations
-  getPaymentsByGym: async (gymId: string): Promise<(Payment & { memberName: string; phone: string })[]> => {
+  getPaymentsByGym: async (gymId) => {
     if (supabase) {
       // Perform join
       const { data, error } = await supabase
-        .from('payments')
-        .select(`
+        .from("payments")
+        .select(
+          `
           *,
           members!inner (
             name,
             phone,
             gym_id
           )
-        `)
-        .eq('members.gym_id', gymId)
-        .order('created_at', { ascending: false });
+        `,
+        )
+        .eq("members.gym_id", gymId)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      return (data || []).map((p: any) => ({
+      return (data || []).map((p) => ({
         id: p.id,
         member_id: p.member_id,
         amount: p.amount,
@@ -362,7 +376,7 @@ export const db = {
     return mockDb.getPaymentsByGym(gymId);
   },
 
-  submitPayment: async (payment: Payment): Promise<void> => {
+  submitPayment: async (payment) => {
     if (supabase) {
       const paymentData = {
         member_id: payment.member_id,
@@ -371,55 +385,55 @@ export const db = {
         screenshot_url: payment.screenshot_url,
         status: payment.status,
       };
-      const { error } = await supabase.from('payments').insert(paymentData);
+      const { error } = await supabase.from("payments").insert(paymentData);
       if (error) throw error;
       return;
     }
     return mockDb.submitPayment(payment);
   },
 
-  updatePaymentStatus: async (paymentId: string, status: 'approved' | 'rejected'): Promise<void> => {
+  updatePaymentStatus: async (paymentId, status) => {
     if (supabase) {
       // Fetch payment to get details
       const { data: payment, error: fetchErr } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('id', paymentId)
+        .from("payments")
+        .select("*")
+        .eq("id", paymentId)
         .single();
       if (fetchErr) throw fetchErr;
 
       // Update payment
       const { error: payErr } = await supabase
-        .from('payments')
+        .from("payments")
         .update({ status })
-        .eq('id', paymentId);
+        .eq("id", paymentId);
       if (payErr) throw payErr;
 
       // Handle status side-effects in Supabase
-      if (status === 'approved') {
+      if (status === "approved") {
         // Fetch member
         const { data: member, error: memErr } = await supabase
-          .from('members')
-          .select('*')
-          .eq('id', payment.member_id)
+          .from("members")
+          .select("*")
+          .eq("id", payment.member_id)
           .single();
         if (memErr) throw memErr;
 
         // Approve pending memberships
         const { data: memberships, error: msErr } = await supabase
-          .from('memberships')
-          .select('*')
-          .eq('member_id', payment.member_id)
-          .eq('status', 'pending');
+          .from("memberships")
+          .select("*")
+          .eq("member_id", payment.member_id)
+          .eq("status", "pending");
         if (msErr) throw msErr;
 
         if (memberships && memberships.length > 0) {
           for (const ms of memberships) {
             // Fetch plan details
             const { data: plan } = await supabase
-              .from('plans')
-              .select('*')
-              .eq('id', ms.plan_id)
+              .from("plans")
+              .select("*")
+              .eq("id", ms.plan_id)
               .maybeSingle();
 
             // Multiplier calculation
@@ -427,52 +441,73 @@ export const db = {
             if (plan && plan.price > 0) {
               multiplier = Math.max(1, Math.round(payment.amount / plan.price));
             }
-            const durationDays = plan ? plan.duration_days * multiplier : 30 * multiplier;
+            const durationDays = plan
+              ? plan.duration_days * multiplier
+              : 30 * multiplier;
 
             // Cumulative start date logic
             let start = new Date();
-            if (member.status === 'active' && member.expires_at && new Date(member.expires_at).getTime() > Date.now()) {
+            if (
+              member.status === "active" &&
+              member.expires_at &&
+              new Date(member.expires_at).getTime() > Date.now()
+            ) {
               start = new Date(member.expires_at);
             }
-            const expiry = new Date(start.getTime() + durationDays * 24 * 60 * 60 * 1000);
+            const expiry = new Date(
+              start.getTime() + durationDays * 24 * 60 * 60 * 1000,
+            );
 
             await supabase
-              .from('memberships')
-              .update({ 
-                status: 'active',
-                start_date: start.toISOString().split('T')[0],
-                expiry_date: expiry.toISOString().split('T')[0]
-              })
-              .eq('id', ms.id);
-
-            await supabase
-              .from('members')
+              .from("memberships")
               .update({
-                status: 'active',
-                expires_at: expiry.toISOString()
+                status: "active",
+                start_date: start.toISOString().split("T")[0],
+                expiry_date: expiry.toISOString().split("T")[0],
               })
-              .eq('id', payment.member_id);
+              .eq("id", ms.id);
+
+            await supabase
+              .from("members")
+              .update({
+                status: "active",
+                expires_at: expiry.toISOString(),
+              })
+              .eq("id", payment.member_id);
           }
         } else {
           // General status update
           let start = new Date();
-          if (member.expires_at && new Date(member.expires_at).getTime() > Date.now()) {
+          if (
+            member.expires_at &&
+            new Date(member.expires_at).getTime() > Date.now()
+          ) {
             start = new Date(member.expires_at);
           }
           const expiry = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
-          await supabase.from('members').update({
-            status: 'active',
-            expires_at: expiry.toISOString()
-          }).eq('id', payment.member_id);
+          await supabase
+            .from("members")
+            .update({
+              status: "active",
+              expires_at: expiry.toISOString(),
+            })
+            .eq("id", payment.member_id);
         }
       } else {
         // Rejected
-        await supabase.from('members').update({ status: 'expired' }).eq('id', payment.member_id);
-        await supabase.from('memberships').update({ status: 'expired' }).eq('member_id', payment.member_id).eq('status', 'pending');
+        await supabase
+          .from("members")
+          .update({ status: "expired" })
+          .eq("id", payment.member_id);
+        await supabase
+          .from("memberships")
+          .update({ status: "expired" })
+          .eq("member_id", payment.member_id)
+          .eq("status", "pending");
       }
 
       return;
     }
     return mockDb.updatePaymentStatus(paymentId, status);
-  }
+  },
 };

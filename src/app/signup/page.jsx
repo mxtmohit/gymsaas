@@ -1,54 +1,59 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Logo from '@/components/Logo';
-import { db } from '@/lib/database';
-import { KeyRound, Mail, Building, Link2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
+import { db } from "@/lib/database";
+import {
+  KeyRound,
+  Mail,
+  Building,
+  Link2,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [gymName, setGymName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [gymName, setGymName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   // Auto-generate slug from Gym Name
   useEffect(() => {
     const generatedSlug = gymName
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // remove special chars
+      .replace(/[^a-z0-9\s-]/g, "") // remove special chars
       .trim()
-      .replace(/\s+/g, '-') // replace spaces with -
-      .replace(/-+/g, '-'); // replace multiple - with single -
+      .replace(/\s+/g, "-") // replace spaces with -
+      .replace(/-+/g, "-"); // replace multiple - with single -
     setSlug(generatedSlug);
   }, [gymName]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!gymName || !slug || !email || !password) {
-      setError('Please fill in all fields.');
+      setError("Please fill in all fields.");
       return;
     }
-    
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await db.signUp(email, gymName, slug, password);
       setSuccess(true);
-      
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push("/dashboard");
       }, 1500);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to sign up. Slug might be taken.');
+    } catch (err) {
+      setError(err?.message || "Failed to sign up. Slug might be taken.");
     } finally {
       setLoading(false);
     }
@@ -56,9 +61,7 @@ export default function SignupPage() {
 
   return (
     <div className="relative min-h-screen bg-brutal-bg flex flex-col justify-center items-center px-4 py-12">
-      
       <div className="w-full max-w-lg space-y-6">
-        
         {/* Header */}
         <div className="flex flex-col items-center text-center space-y-2">
           <Link href="/">
@@ -87,10 +90,12 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            
             {/* Gym Name Field */}
             <div>
-              <label htmlFor="gym-name" className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2">
+              <label
+                htmlFor="gym-name"
+                className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2"
+              >
                 Gym Name
               </label>
               <div className="relative">
@@ -111,7 +116,10 @@ export default function SignupPage() {
 
             {/* Custom Slug Field */}
             <div>
-              <label htmlFor="slug" className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2">
+              <label
+                htmlFor="slug"
+                className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2"
+              >
                 Custom Join URL Slug
               </label>
               <div className="relative">
@@ -124,22 +132,29 @@ export default function SignupPage() {
                   required
                   placeholder="golds-gym-bilaspur"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                  onChange={(e) =>
+                    setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
+                  }
                   className="neo-input block w-full !pl-11 font-mono text-brutal-orange"
                 />
               </div>
-              
+
               <div className="mt-2.5 bg-brutal-bg p-3 border-2 border-black rounded-lg">
                 <p className="text-[10px] sm:text-xs font-bold text-black leading-normal">
                   Branded onboarding link: <br />
-                  <span className="text-brutal-orange font-mono font-black">{slug || 'your-gym-slug'}.mygymsaas.com</span>
+                  <span className="text-brutal-orange font-mono font-black">
+                    {slug || "your-gym-slug"}.mygymsaas.com
+                  </span>
                 </p>
               </div>
             </div>
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2">
+              <label
+                htmlFor="email"
+                className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -160,7 +175,10 @@ export default function SignupPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2">
+              <label
+                htmlFor="password"
+                className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -169,19 +187,24 @@ export default function SignupPage() {
                 </div>
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="neo-input block w-full !pl-11 !pr-10"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-750 hover:text-black cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4 stroke-[2.5]" /> : <Eye className="w-4 h-4 stroke-[2.5]" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 stroke-[2.5]" />
+                  ) : (
+                    <Eye className="w-4 h-4 stroke-[2.5]" />
+                  )}
                 </button>
               </div>
             </div>
@@ -201,21 +224,21 @@ export default function SignupPage() {
                 <span>Register & Set Up Gym</span>
               )}
             </button>
-
           </form>
 
           {/* Footer Navigation */}
           <div className="mt-8 pt-6 border-t-3 border-black text-center">
             <p className="text-slate-700 text-sm font-bold">
-              Already have an account?{' '}
-              <Link href="/login" className="text-brutal-orange font-extrabold hover:underline transition">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-brutal-orange font-extrabold hover:underline transition"
+              >
                 Log In
               </Link>
             </p>
           </div>
-
         </div>
-
       </div>
     </div>
   );

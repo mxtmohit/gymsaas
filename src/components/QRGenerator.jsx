@@ -1,18 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Copy, Download, Printer, Check, Share2 } from 'lucide-react';
+import React, { useState } from "react";
+import { Copy, Download, Printer, Check, Share2 } from "lucide-react";
 
-interface QRGeneratorProps {
-  value: string;
-  gymName: string;
-  gymSlug: string;
-}
-
-export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProps) {
+export default function QRGenerator({ value, gymName, gymSlug }) {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=ffffff&data=${encodeURIComponent(value)}`;
 
   const handleCopy = async () => {
@@ -21,7 +14,7 @@ export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProp
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
 
@@ -31,7 +24,7 @@ export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProp
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = blobUrl;
       link.download = `${gymSlug}-membership-qr.png`;
       document.body.appendChild(link);
@@ -39,15 +32,15 @@ export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProp
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      console.error('Failed to download QR code, opening in new tab: ', err);
-      window.open(qrUrl, '_blank');
+      console.error("Failed to download QR code, opening in new tab: ", err);
+      window.open(qrUrl, "_blank");
     } finally {
       setDownloading(false);
     }
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
     printWindow.document.write(`
@@ -140,9 +133,9 @@ export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProp
     <div className="neo-card p-6 flex flex-col items-center">
       <div className="relative group bg-white border-3 border-black p-4 rounded-xl shadow-[3px_3px_0px_0px_#000000]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src={qrUrl} 
-          alt={`QR Code for ${gymName}`} 
+        <img
+          src={qrUrl}
+          alt={`QR Code for ${gymName}`}
           className="w-48 h-48 sm:w-56 sm:h-56 bg-white"
         />
       </div>
@@ -150,33 +143,38 @@ export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProp
       <div className="w-full mt-6 space-y-4">
         {/* URL Display */}
         <div className="flex items-center gap-2 bg-[#f4f2ed] border-3 border-black rounded-lg p-2.5 shadow-[2px_2px_0px_0px_#000000]">
-          <input 
-            type="text" 
-            readOnly 
-            value={value} 
+          <input
+            type="text"
+            readOnly
+            value={value}
             className="flex-1 bg-transparent text-xs text-black font-mono font-bold focus:outline-none select-all overflow-ellipsis"
           />
-          <button 
+
+          <button
             onClick={handleCopy}
             className="p-1.5 hover:bg-slate-200 border-2 border-black rounded transition-colors text-black"
             title="Copy URL"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            {copied ? (
+              <Check className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
           </button>
         </div>
 
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-2">
-          <button 
+          <button
             onClick={handleDownload}
             disabled={downloading}
             className="neo-btn text-xs py-2.5 px-2 flex flex-col gap-1 items-center justify-center"
           >
             <Download className="w-4 h-4" />
-            <span>{downloading ? 'Saving...' : 'Download'}</span>
+            <span>{downloading ? "Saving..." : "Download"}</span>
           </button>
 
-          <button 
+          <button
             onClick={handlePrint}
             className="neo-btn neo-btn-cyan text-xs py-2.5 px-2 flex flex-col gap-1 items-center justify-center"
           >
@@ -184,12 +182,12 @@ export default function QRGenerator({ value, gymName, gymSlug }: QRGeneratorProp
             <span>Print QR</span>
           </button>
 
-          <button 
+          <button
             onClick={handleCopy}
             className="neo-btn neo-btn-yellow text-xs py-2.5 px-2 flex flex-col gap-1 items-center justify-center"
           >
             <Share2 className="w-4 h-4" />
-            <span>{copied ? 'Copied!' : 'Share QR'}</span>
+            <span>{copied ? "Copied!" : "Share QR"}</span>
           </button>
         </div>
       </div>

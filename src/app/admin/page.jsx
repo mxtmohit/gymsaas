@@ -1,10 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
-import Logo from '@/components/Logo';
-import { db } from '@/lib/database';
-import { Gym, Member, Plan, Payment } from '@/lib/mockDb';
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import Logo from "@/components/Logo";
+import { db } from "@/lib/database";
 import {
   Building,
   Users,
@@ -17,17 +16,15 @@ import {
   Lock,
   Unlock,
   TrendingUp,
-  IndianRupee
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
-  const [gyms, setGyms] = useState<Gym[]>([]);
-  const [allMembers, setAllMembers] = useState<Member[]>([]);
-  const [allPayments, setAllPayments] = useState<(Payment & { memberName: string; phone: string })[]>([]);
-  
+  const [gyms, setGyms] = useState([]);
+  const [allMembers, setAllMembers] = useState([]);
+  const [allPayments, setAllPayments] = useState([]);
   // Search
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Load all gyms on platform
   useEffect(() => {
@@ -36,8 +33,8 @@ export default function AdminDashboard() {
         const gymsList = await db.getGymsList();
         setGyms(gymsList);
 
-        let membersAcc: Member[] = [];
-        let paymentsAcc: (Payment & { memberName: string; phone: string })[] = [];
+        let membersAcc = [];
+        let paymentsAcc = [];
 
         for (const gym of gymsList) {
           const gymMembers = await db.getMembersByGym(gym.id);
@@ -49,7 +46,7 @@ export default function AdminDashboard() {
         setAllMembers(membersAcc);
         setAllPayments(paymentsAcc);
       } catch (err) {
-        console.error('Failed to load super admin data', err);
+        console.error("Failed to load super admin data", err);
       } finally {
         setLoading(false);
       }
@@ -62,8 +59,8 @@ export default function AdminDashboard() {
       const gymsList = await db.getGymsList();
       setGyms(gymsList);
 
-      let membersAcc: Member[] = [];
-      let paymentsAcc: (Payment & { memberName: string; phone: string })[] = [];
+      let membersAcc = [];
+      let paymentsAcc = [];
 
       for (const gym of gymsList) {
         const gymMembers = await db.getMembersByGym(gym.id);
@@ -80,59 +77,87 @@ export default function AdminDashboard() {
   };
 
   // Toggle Gym Suspension
-  const handleToggleSuspend = async (gym: Gym) => {
-    const isSuspended = !(gym as any).is_suspended;
-    
+  const handleToggleSuspend = async (gym) => {
+    const isSuspended = !gym.is_suspended;
     try {
       const updatedGym = {
         ...gym,
-        is_suspended: isSuspended
-      } as any;
-      
+        is_suspended: isSuspended,
+      };
       await db.updateGym(updatedGym);
-      
-      if (typeof window !== 'undefined') {
-        const localGyms = JSON.parse(window.localStorage.getItem('gyms') || '[]');
-        const idx = localGyms.findIndex((g: any) => g.id === gym.id);
+      if (typeof window !== "undefined") {
+        const localGyms = JSON.parse(
+          window.localStorage.getItem("gyms") || "[]",
+        );
+        const idx = localGyms.findIndex((g) => g.id === gym.id);
         if (idx !== -1) {
           localGyms[idx].is_suspended = isSuspended;
-          window.localStorage.setItem('gyms', JSON.stringify(localGyms));
+          window.localStorage.setItem("gyms", JSON.stringify(localGyms));
         }
       }
-      
       await refreshAdmin();
     } catch (err) {
-      alert('Failed to update suspension status.');
+      alert("Failed to update suspension status.");
     }
   };
 
   // Delete Gym
-  const handleDeleteGym = async (gymId: string, gymName: string) => {
-    if (!confirm(`Warning: Are you sure you want to delete "${gymName}"? All plans, members, and billing logs will be permanently deleted.`)) return;
+  const handleDeleteGym = async (gymId, gymName) => {
+    if (
+      !confirm(
+        `Warning: Are you sure you want to delete "${gymName}"? All plans, members, and billing logs will be permanently deleted.`,
+      )
+    )
+      return;
     try {
       await db.deleteGym(gymId);
-      
-      if (typeof window !== 'undefined') {
-        const plans = JSON.parse(window.localStorage.getItem('plans') || '[]');
-        const members = JSON.parse(window.localStorage.getItem('members') || '[]');
-        const memberships = JSON.parse(window.localStorage.getItem('memberships') || '[]');
-        const payments = JSON.parse(window.localStorage.getItem('payments') || '[]');
+      if (typeof window !== "undefined") {
+        const plans = JSON.parse(window.localStorage.getItem("plans") || "[]");
+        const members = JSON.parse(
+          window.localStorage.getItem("members") || "[]",
+        );
+        const memberships = JSON.parse(
+          window.localStorage.getItem("memberships") || "[]",
+        );
+        const payments = JSON.parse(
+          window.localStorage.getItem("payments") || "[]",
+        );
 
-        window.localStorage.setItem('plans', JSON.stringify(plans.filter((p: any) => p.gym_id !== gymId)));
-        window.localStorage.setItem('members', JSON.stringify(members.filter((m: any) => m.gym_id !== gymId)));
-        window.localStorage.setItem('memberships', JSON.stringify(memberships.filter((ms: any) => {
-          const gymMemberIds = members.filter((m: any) => m.gym_id === gymId).map((m: any) => m.id);
-          return !gymMemberIds.includes(ms.member_id);
-        })));
-        window.localStorage.setItem('payments', JSON.stringify(payments.filter((p: any) => {
-          const gymMemberIds = members.filter((m: any) => m.gym_id === gymId).map((m: any) => m.id);
-          return !gymMemberIds.includes(p.member_id);
-        })));
+        window.localStorage.setItem(
+          "plans",
+          JSON.stringify(plans.filter((p) => p.gym_id !== gymId)),
+        );
+        window.localStorage.setItem(
+          "members",
+          JSON.stringify(members.filter((m) => m.gym_id !== gymId)),
+        );
+        window.localStorage.setItem(
+          "memberships",
+          JSON.stringify(
+            memberships.filter((ms) => {
+              const gymMemberIds = members
+                .filter((m) => m.gym_id === gymId)
+                .map((m) => m.id);
+              return !gymMemberIds.includes(ms.member_id);
+            }),
+          ),
+        );
+        window.localStorage.setItem(
+          "payments",
+          JSON.stringify(
+            payments.filter((p) => {
+              const gymMemberIds = members
+                .filter((m) => m.gym_id === gymId)
+                .map((m) => m.id);
+              return !gymMemberIds.includes(p.member_id);
+            }),
+          ),
+        );
       }
 
       await refreshAdmin();
     } catch (err) {
-      alert('Failed to delete gym.');
+      alert("Failed to delete gym.");
     }
   };
 
@@ -140,9 +165,11 @@ export default function AdminDashboard() {
   const metrics = useMemo(() => {
     const totalGyms = gyms.length;
     const totalMembers = allMembers.length;
-    const activeMembers = allMembers.filter(m => m.status === 'active').length;
+    const activeMembers = allMembers.filter(
+      (m) => m.status === "active",
+    ).length;
     const totalRevenue = allPayments
-      .filter(p => p.status === 'approved')
+      .filter((p) => p.status === "approved")
       .reduce((sum, p) => sum + p.amount, 0);
 
     return { totalGyms, totalMembers, activeMembers, totalRevenue };
@@ -150,10 +177,12 @@ export default function AdminDashboard() {
 
   // Filter gyms
   const filteredGyms = useMemo(() => {
-    return gyms.filter(g => 
-      g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      g.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (g.address && g.address.toLowerCase().includes(searchQuery.toLowerCase()))
+    return gyms.filter(
+      (g) =>
+        g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        g.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (g.address &&
+          g.address.toLowerCase().includes(searchQuery.toLowerCase())),
     );
   }, [gyms, searchQuery]);
 
@@ -162,7 +191,9 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-brutal-bg flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <ShieldAlert className="w-8 h-8 text-black animate-bounce" />
-          <p className="text-black font-extrabold text-sm uppercase">Loading Admin Console...</p>
+          <p className="text-black font-extrabold text-sm uppercase">
+            Loading Admin Console...
+          </p>
         </div>
       </div>
     );
@@ -170,12 +201,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-brutal-bg text-black font-sans relative">
-      
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b-3 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="p-1.5 hover:bg-slate-50 border-2 border-black rounded-lg text-black transition shadow-[2px_2px_0px_0px_#000000]">
+            <Link
+              href="/"
+              className="p-1.5 hover:bg-slate-50 border-2 border-black rounded-lg text-black transition shadow-[2px_2px_0px_0px_#000000]"
+            >
               <ArrowLeft className="w-4 h-4 stroke-[3]" />
             </Link>
             <Logo />
@@ -191,34 +224,55 @@ export default function AdminDashboard() {
 
       {/* Dashboard Body */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        
         {/* Metric Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          
           <div className="neo-card p-6 bg-white shadow-[4px_4px_0px_0px_#000000] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-black"><Building className="w-16 h-16" /></div>
-            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">Total Gyms</p>
-            <p className="text-3xl font-extrabold text-black mt-2">{metrics.totalGyms}</p>
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-black">
+              <Building className="w-16 h-16" />
+            </div>
+            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">
+              Total Gyms
+            </p>
+            <p className="text-3xl font-extrabold text-black mt-2">
+              {metrics.totalGyms}
+            </p>
           </div>
 
           <div className="neo-card p-6 bg-white shadow-[4px_4px_0px_0px_#000000] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-black"><Users className="w-16 h-16" /></div>
-            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">Total Members</p>
-            <p className="text-3xl font-extrabold text-black mt-2">{metrics.totalMembers}</p>
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-black">
+              <Users className="w-16 h-16" />
+            </div>
+            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">
+              Total Members
+            </p>
+            <p className="text-3xl font-extrabold text-black mt-2">
+              {metrics.totalMembers}
+            </p>
           </div>
 
           <div className="neo-card p-6 bg-white border-l-brutal-green shadow-[4px_4px_0px_0px_#000000] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-black"><CheckCircle className="w-16 h-16" /></div>
-            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">Active Passes</p>
-            <p className="text-3xl font-extrabold text-brutal-green mt-2">{metrics.activeMembers}</p>
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-black">
+              <CheckCircle className="w-16 h-16" />
+            </div>
+            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">
+              Active Passes
+            </p>
+            <p className="text-3xl font-extrabold text-brutal-green mt-2">
+              {metrics.activeMembers}
+            </p>
           </div>
 
           <div className="neo-card p-6 bg-white border-l-brutal-cyan shadow-[4px_4px_0px_0px_#000000] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-black"><TrendingUp className="w-16 h-16" /></div>
-            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">SaaS Revenue</p>
-            <p className="text-3xl font-extrabold text-brutal-cyan mt-2">₹{metrics.totalRevenue.toLocaleString('en-IN')}</p>
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-black">
+              <TrendingUp className="w-16 h-16" />
+            </div>
+            <p className="text-slate-650 text-xs font-black uppercase tracking-wider">
+              SaaS Revenue
+            </p>
+            <p className="text-3xl font-extrabold text-brutal-cyan mt-2">
+              ₹{metrics.totalRevenue.toLocaleString("en-IN")}
+            </p>
           </div>
-
         </div>
 
         {/* Gym Search */}
@@ -235,7 +289,7 @@ export default function AdminDashboard() {
               className="neo-input block w-full !pl-10 !pr-3 py-2 text-sm"
             />
           </div>
-          
+
           <div className="text-black font-extrabold text-xs sm:text-sm uppercase bg-white border-2 border-black rounded px-3 py-1.5 shadow-[2px_2px_0px_0px_#000000]">
             Showing {filteredGyms.length} of {gyms.length} gyms
           </div>
@@ -247,53 +301,81 @@ export default function AdminDashboard() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b-3 border-black bg-[#fafafa] text-black text-xs font-black uppercase tracking-wider">
-                  <th className="p-4 sm:p-5 border-r-2 border-black/10">Gym Details</th>
-                  <th className="p-4 sm:p-5 border-r-2 border-black/10">Contact Address</th>
-                  <th className="p-4 sm:p-5 border-r-2 border-black/10">Created At</th>
-                  <th className="p-4 sm:p-5 border-r-2 border-black/10">Status</th>
+                  <th className="p-4 sm:p-5 border-r-2 border-black/10">
+                    Gym Details
+                  </th>
+                  <th className="p-4 sm:p-5 border-r-2 border-black/10">
+                    Contact Address
+                  </th>
+                  <th className="p-4 sm:p-5 border-r-2 border-black/10">
+                    Created At
+                  </th>
+                  <th className="p-4 sm:p-5 border-r-2 border-black/10">
+                    Status
+                  </th>
                   <th className="p-4 sm:p-5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-black text-sm">
                 {filteredGyms.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-10 text-center font-bold text-slate-500 text-xs sm:text-sm">
+                    <td
+                      colSpan={5}
+                      className="p-10 text-center font-bold text-slate-500 text-xs sm:text-sm"
+                    >
                       No registered gyms matching the query.
                     </td>
                   </tr>
                 ) : (
                   filteredGyms.map((gym) => {
-                    const isSuspended = (gym as any).is_suspended === true;
+                    const isSuspended = gym.is_suspended === true;
                     const createdDate = new Date(gym.created_at);
-                    const formattedCreated = createdDate.toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    });
+                    const formattedCreated = createdDate.toLocaleDateString(
+                      "en-IN",
+                      {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      },
+                    );
 
                     return (
-                      <tr key={gym.id} className="hover:bg-slate-50 transition-colors">
-                        
+                      <tr
+                        key={gym.id}
+                        className="hover:bg-slate-50 transition-colors"
+                      >
                         <td className="p-4 sm:p-5 border-r-2 border-black/10">
                           <div className="flex items-center gap-3">
                             {gym.logo_url ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={gym.logo_url} alt="Logo" className="w-9 h-9 border-2 border-black rounded object-cover bg-white" />
+                              <img
+                                src={gym.logo_url}
+                                alt="Logo"
+                                className="w-9 h-9 border-2 border-black rounded object-cover bg-white"
+                              />
                             ) : (
                               <div className="w-9 h-9 rounded bg-brutal-cyan border-2 border-black flex items-center justify-center text-black font-black text-xs">
                                 {gym.name.charAt(0)}
                               </div>
                             )}
                             <div className="min-w-0">
-                              <div className="font-extrabold uppercase text-black truncate max-w-[180px] sm:max-w-xs">{gym.name}</div>
-                              <div className="text-slate-700 text-xs font-mono font-bold truncate max-w-[180px]">{gym.slug}.mygymsaas.com</div>
+                              <div className="font-extrabold uppercase text-black truncate max-w-[180px] sm:max-w-xs">
+                                {gym.name}
+                              </div>
+                              <div className="text-slate-700 text-xs font-mono font-bold truncate max-w-[180px]">
+                                {gym.slug}.mygymsaas.com
+                              </div>
                             </div>
                           </div>
                         </td>
 
                         <td className="p-4 sm:p-5 border-r-2 border-black/10 font-bold">
-                          <div className="text-slate-800 text-xs sm:text-sm">{gym.phone || 'No phone'}</div>
-                          <div className="text-slate-650 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-xs">{gym.address || 'No address'}</div>
+                          <div className="text-slate-800 text-xs sm:text-sm">
+                            {gym.phone || "No phone"}
+                          </div>
+                          <div className="text-slate-650 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-xs">
+                            {gym.address || "No address"}
+                          </div>
                         </td>
 
                         <td className="p-4 sm:p-5 border-r-2 border-black/10 text-slate-800 font-mono text-xs font-bold">
@@ -301,25 +383,28 @@ export default function AdminDashboard() {
                         </td>
 
                         <td className="p-4 sm:p-5 border-r-2 border-black/10">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded border-2 border-black text-[10px] sm:text-xs font-black uppercase ${
-                            isSuspended 
-                              ? 'bg-brutal-red text-black' 
-                              : 'bg-brutal-green text-black'
-                          }`}>
-                            {isSuspended ? 'Suspended' : 'Active'}
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded border-2 border-black text-[10px] sm:text-xs font-black uppercase ${
+                              isSuspended
+                                ? "bg-brutal-red text-black"
+                                : "bg-brutal-green text-black"
+                            }`}
+                          >
+                            {isSuspended ? "Suspended" : "Active"}
                           </span>
                         </td>
 
                         <td className="p-4 sm:p-5 text-right space-x-1.5">
-                          
                           <button
                             onClick={() => handleToggleSuspend(gym)}
                             className={`neo-btn py-1 px-2.5 text-xs shadow-[2px_2px_0px_0px_#000000] border-2 ${
-                              isSuspended 
-                                ? 'bg-brutal-green' 
-                                : 'bg-brutal-red'
+                              isSuspended ? "bg-brutal-green" : "bg-brutal-red"
                             }`}
-                            title={isSuspended ? 'Activate Gym Profile' : 'Suspend Gym Profile'}
+                            title={
+                              isSuspended
+                                ? "Activate Gym Profile"
+                                : "Suspend Gym Profile"
+                            }
                           >
                             {isSuspended ? (
                               <>
@@ -350,9 +435,7 @@ export default function AdminDashboard() {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-
                         </td>
-
                       </tr>
                     );
                   })
@@ -361,9 +444,7 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
-
       </main>
-
     </div>
   );
 }

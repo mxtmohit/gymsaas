@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import Logo from '@/components/Logo';
-import { Mail, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import React, { useState } from "react";
+import Link from "next/link";
+import Logo from "@/components/Logo";
+import { Mail, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!email) return;
 
@@ -25,9 +25,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="relative min-h-screen bg-brutal-bg flex flex-col justify-center items-center px-4 py-12">
-      
       <div className="w-full max-w-md space-y-6">
-        
         {/* Header */}
         <div className="flex flex-col items-center text-center space-y-2">
           <Link href="/">
@@ -43,17 +41,20 @@ export default function ForgotPasswordPage() {
 
         {/* Card */}
         <div className="neo-card p-8 bg-white border-3 border-black shadow-[6px_6px_0px_0px_#000000]">
-          
           {success ? (
             <div className="space-y-6 text-center">
               <div className="w-12 h-12 bg-green-100 border-3 border-black text-black rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-lg font-extrabold uppercase">Check Your Inbox</h3>
+                <h3 className="text-lg font-extrabold uppercase">
+                  Check Your Inbox
+                </h3>
                 <p className="text-slate-850 text-sm font-semibold leading-relaxed">
                   We have sent recovery instructions to <br />
-                  <span className="text-brutal-orange font-mono font-black">{email}</span>
+                  <span className="text-brutal-orange font-mono font-black">
+                    {email}
+                  </span>
                 </p>
               </div>
               <Link
@@ -66,10 +67,12 @@ export default function ForgotPasswordPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-xs font-black uppercase text-slate-800 tracking-wider mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -114,12 +117,9 @@ export default function ForgotPasswordPage() {
                   <span>Back to Log In</span>
                 </Link>
               </div>
-
             </form>
           )}
-
         </div>
-
       </div>
     </div>
   );
